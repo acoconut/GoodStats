@@ -1,10 +1,11 @@
-import secretKeys as sk
-from xml.etree import ElementTree 
+import secretKeys as SK
+import xml.etree.ElementTree as ET
 from rauth.service import OAuth1Service, OAuth1Session
+import StringIO as SIO
 
 goodreads = OAuth1Service(
-    consumer_key=sk.CONSUMER_KEY,
-    consumer_secret=sk.CONSUMER_SECRET,
+    consumer_key=SK.CONSUMER_KEY,
+    consumer_secret=SK.CONSUMER_SECRET,
     name='goodreads',
     request_token_url='http://www.goodreads.com/oauth/request_token',
     authorize_url='http://www.goodreads.com/oauth/authorize',
@@ -23,20 +24,23 @@ while accepted.lower() == 'n':
     # and proceed to manually authorize the consumer
     accepted = raw_input('Have you authorized me? (y/n) ')
 
-print request_token
-print request_token_secret
-
 session = goodreads.get_auth_session(request_token, request_token_secret)
 
 params = {'v': 2,
-          'key': CONSUMER_KEY,
+          'key': SK.CONSUMER_KEY,
           'shelf': 'read'}
 
-response = session.get('https://www.goodreads.com/review/list.xml?', params=params).content
+response = session.get('https://www.goodreads.com/review/list.xml?', params=params)
 
-print response
-tree = ElementTree.fromstring(response)
+#tree = ET.parse(response)
 
+responseFile = SIO.StringIO()
+responseFile.write(response.content)
+responseFile.seek(0)
 
-    
+tree = ET.parse(responseFile)
 
+root = tree.getroot()
+
+for book in root.iter('book'):
+    print book.find('title').text
