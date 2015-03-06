@@ -28,16 +28,13 @@ session = goodreads.get_auth_session(request_token, request_token_secret)
 
 params = {'v': 2,
           'key': SK.CONSUMER_KEY,
-          'shelf': 'read'}
+          'shelf': 'read',
+          'per_page': 200}
 
-response = session.get('https://www.goodreads.com/review/list.xml?', params=params)
-
-#tree = ET.parse(response)
-
+response = session.get('https://www.goodreads.com/review/list.xml?', params=params).content
 responseFile = SIO.StringIO()
-responseFile.write(response.content)
+responseFile.write(response)
 responseFile.seek(0)
-
 tree = ET.parse(responseFile)
 
 root = tree.getroot()
