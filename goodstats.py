@@ -1,7 +1,6 @@
 import secretKeys as SK
 import xml.etree.ElementTree as ET
 from rauth.service import OAuth1Service, OAuth1Session
-import StringIO as SIO
 
 goodreads = OAuth1Service(
     consumer_key=SK.CONSUMER_KEY,
@@ -32,12 +31,13 @@ params = {'v': 2,
           'per_page': 200}
 
 response = session.get('https://www.goodreads.com/review/list.xml?', params=params).content
-responseFile = SIO.StringIO()
-responseFile.write(response)
-responseFile.seek(0)
-tree = ET.parse(responseFile)
 
-root = tree.getroot()
+root = ET.fromstring(response)
 
+cont = 0 #to check if we retrieve 200 books
 for book in root.iter('book'):
     print book.find('title').text
+    cont = cont +1
+
+print cont
+    
