@@ -2,6 +2,8 @@ import secretKeys as SK
 import xml.etree.ElementTree as ET
 from rauth.service import OAuth1Service, OAuth1Session
 
+BOOKS_PER_PAGE = 200 # Number of books to be retrieved at once. Max=200
+
 goodreads = OAuth1Service(
     consumer_key=SK.CONSUMER_KEY,
     consumer_secret=SK.CONSUMER_SECRET,
@@ -25,19 +27,27 @@ while accepted.lower() == 'n':
 
 session = goodreads.get_auth_session(request_token, request_token_secret)
 
-params = {'v': 2,
-          'key': SK.CONSUMER_KEY,
-          'shelf': 'read',
-          'per_page': 200}
+cont = BOOKS_PER_PAGE #to check if we retrieve 200 books
+page = 0
 
-response = session.get('https://www.goodreads.com/review/list.xml?', params=params).content
+books = []
+while cont == BOOKS_PER_PAGE:
+    cont = 0
+    params = {'v': 2,
+              'key': SK.CONSUMER_KEY,
+              'page': page,
+              'shelf': 'read',
+              'per_page': BOOKS_PER_PAGE}
 
-root = ET.fromstring(response)
+    response = session.get('https://www.goodreads.com/review/list.xml?', params=params).content
+    root = ET.fromstring(response)
 
-cont = 0 #to check if we retrieve 200 books
-for book in root.iter('book'):
-    print book.find('title').text
-    cont = cont +1
+    page = page + 1
+
+    for book in root.iter('book'):
+        books.append([book.find('title').text])
+        print book.find('title').text
+        cont = cont +1
 
 print cont
     
